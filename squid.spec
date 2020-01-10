@@ -2,7 +2,7 @@
 
 Name:     squid
 Version:  3.1.23
-Release:  16%{?dist}.4
+Release:  16%{?dist}.5
 Summary:  The Squid proxy caching server
 Epoch:    7
 License:  GPLv2 and (LGPLv2+ and Public Domain)
@@ -73,6 +73,8 @@ Patch241: squid-CVE-2016-4052.patch
 Patch242: squid-CVE-2016-4554.patch
 # http://www.squid-cache.org/Advisories/SQUID-2016_9.txt
 Patch243: squid-CVE-2016-4556.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1339980
+Patch244: squid-3.1.23-membuf-size.patch
 
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: bash >= 2.0
@@ -140,6 +142,7 @@ lookup program (dnsserver), a program for retrieving FTP data
 %patch241 -p1 -b .CVE-2016-4052
 %patch242 -p1 -b .CVE-2016-4554
 %patch243 -p1 -b .CVE-2016-4556
+%patch244 -p1 -b .membuf-size
 
 sed \
     -e 's^@DEFAULT_CONFIG_FILE@^%{_sysconfdir}/squid/squid.conf^g' \
@@ -363,6 +366,9 @@ if [ "$1" -ge "1" ] ; then
 fi
 
 %changelog
+* Wed Jun 29 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.5
+- Resolves: #1351313 - squid aborts with MemBuf.cc:280: "size < capacity" messages
+
 * Thu May 12 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.4
 - Related: #1334489 - CVE-2016-4554 CVE-2016-4556 squid: various flaws
 
