@@ -2,7 +2,7 @@
 
 Name:     squid
 Version:  3.1.23
-Release:  16%{?dist}
+Release:  16%{?dist}.4
 Summary:  The Squid proxy caching server
 Epoch:    7
 License:  GPLv2 and (LGPLv2+ and Public Domain)
@@ -65,6 +65,14 @@ Patch237: squid-3.1.23-1171967.patch
 Patch238: squid-3.1.23-comm-assert.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=1319705
 Patch239: squid-3.1.23-read-buffer.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1330573
+Patch240: squid-CVE-2016-4051.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1329136
+Patch241: squid-CVE-2016-4052.patch
+# http://www.squid-cache.org/Advisories/SQUID-2016_8.txt
+Patch242: squid-CVE-2016-4554.patch
+# http://www.squid-cache.org/Advisories/SQUID-2016_9.txt
+Patch243: squid-CVE-2016-4556.patch
 
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: bash >= 2.0
@@ -128,6 +136,10 @@ lookup program (dnsserver), a program for retrieving FTP data
 %patch237 -p0
 %patch238 -p1
 %patch239 -p1
+%patch240 -p1 -b .CVE-2016-4051
+%patch241 -p1 -b .CVE-2016-4052
+%patch242 -p1 -b .CVE-2016-4554
+%patch243 -p1 -b .CVE-2016-4556
 
 sed \
     -e 's^@DEFAULT_CONFIG_FILE@^%{_sysconfdir}/squid/squid.conf^g' \
@@ -351,6 +363,22 @@ if [ "$1" -ge "1" ] ; then
 fi
 
 %changelog
+* Thu May 12 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.4
+- Related: #1334489 - CVE-2016-4554 CVE-2016-4556 squid: various flaws
+
+* Tue May 10 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.3
+- Resolved: #1334489 - CVE-2016-4554 CVE-2016-4556 squid: various flaws
+- Related: #1330572 - CVE-2016-4051 CVE-2016-4052 CVE-2016-4053 CVE-2016-4054
+  squid: various flaws
+
+* Thu Apr 28 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.2
+- Related: #1330572 - CVE-2016-4051 CVE-2016-4052 CVE-2016-4053 CVE-2016-4054
+  squid: various flaws
+
+* Thu Apr 28 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.1
+- Resolves: #1330572 - CVE-2016-4051 CVE-2016-4052 CVE-2016-4053 CVE-2016-4054
+  squid: various flaws
+
 * Wed Mar 30 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16
 - Resolves: #1319705 - Squid send wrong respond for GET-request 
   following Range-GET request
