@@ -2,7 +2,7 @@
 
 Name:     squid
 Version:  3.1.23
-Release:  16%{?dist}.6
+Release:  24%{?dist}
 Summary:  The Squid proxy caching server
 Epoch:    7
 License:  GPLv2 and (LGPLv2+ and Public Domain)
@@ -75,6 +75,10 @@ Patch242: squid-CVE-2016-4554.patch
 Patch243: squid-CVE-2016-4556.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=1339980
 Patch244: squid-3.1.23-membuf-size.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1343020
+Patch245: squid-3.1.23-body-pipe.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1235114
+Patch246: squid-3.1.23-reconf_busy_srv.patch
 
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: bash >= 2.0
@@ -143,6 +147,8 @@ lookup program (dnsserver), a program for retrieving FTP data
 %patch242 -p1 -b .CVE-2016-4554
 %patch243 -p1 -b .CVE-2016-4556
 %patch244 -p1 -b .membuf-size
+%patch245 -p1 -b .body-pipe
+%patch246 -p1 -b .reconf_busy_srv
 
 sed \
     -e 's^@DEFAULT_CONFIG_FILE@^%{_sysconfdir}/squid/squid.conf^g' \
@@ -366,27 +372,35 @@ if [ "$1" -ge "1" ] ; then
 fi
 
 %changelog
-* Mon Jul 25 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.6
-- Resolves: #1359204 - CVE-2016-5408 squid: Buffer overflow vulnerability
+* Mon Oct 17 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-24
+- Resolves: #1235114 - Squid crashes with 'assertion failed: disk.cc:377:
+  "fd >= 0"' after reloading the configuration.
+
+* Wed Oct 12 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-23
+- Resolves: #1343020 - squid aborts with assertion failed: Server.cc:246:
+  "r->body_pipe != NULL"
+
+* Mon Jul 25 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-22
+- Resolves: #1359205 - CVE-2016-5408 squid: Buffer overflow vulnerability
   in cachemgr.cgi tool
 
-* Wed Jun 29 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.5
-- Resolves: #1351313 - squid aborts with MemBuf.cc:280: "size < capacity" messages
+* Wed Jun 29 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-21
+- Resolves: #1339980 - squid aborts with MemBuf.cc:280: "size < capacity" messages
 
-* Thu May 12 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.4
-- Related: #1334489 - CVE-2016-4554 CVE-2016-4556 squid: various flaws
+* Thu May 12 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-20
+- Related: #1334490 - CVE-2016-4554 CVE-2016-4556 squid: various flaws
 
-* Tue May 10 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.3
-- Resolved: #1334489 - CVE-2016-4554 CVE-2016-4556 squid: various flaws
-- Related: #1330572 - CVE-2016-4051 CVE-2016-4052 CVE-2016-4053 CVE-2016-4054
+* Mon May 09 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-19
+- Resolved: #1334490 - CVE-2016-4554 CVE-2016-4556 squid: various flaws
+- Related: #1330573 - CVE-2016-4051 CVE-2016-4052 CVE-2016-4053 CVE-2016-4054
   squid: various flaws
 
-* Thu Apr 28 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.2
-- Related: #1330572 - CVE-2016-4051 CVE-2016-4052 CVE-2016-4053 CVE-2016-4054
+* Tue May 03 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-18
+- Related: #1330573 - CVE-2016-4051 CVE-2016-4052 CVE-2016-4053 CVE-2016-4054
   squid: various flaws
 
-* Thu Apr 28 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.1
-- Resolves: #1330572 - CVE-2016-4051 CVE-2016-4052 CVE-2016-4053 CVE-2016-4054
+* Thu Apr 28 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-17
+- Resolves: #1330573 - CVE-2016-4051 CVE-2016-4052 CVE-2016-4053 CVE-2016-4054
   squid: various flaws
 
 * Wed Mar 30 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16

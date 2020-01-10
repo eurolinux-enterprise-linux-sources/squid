@@ -1,0 +1,271 @@
+diff --git a/src/fs/ufs/store_dir_ufs.cc b/src/fs/ufs/store_dir_ufs.cc
+index b232261..aa9f75b 100644
+--- a/src/fs/ufs/store_dir_ufs.cc
++++ b/src/fs/ufs/store_dir_ufs.cc
+@@ -241,7 +241,7 @@ UFSSwapDir::create()
+     createSwapSubDirs();
+ }
+ 
+-UFSSwapDir::UFSSwapDir(char const *aType, const char *anIOType) : SwapDir(aType), IO(NULL), map(file_map_create()), suggest(0), swaplog_fd (-1), currentIOOptions(new ConfigOptionVector()), ioType(xstrdup(anIOType))
++UFSSwapDir::UFSSwapDir(char const *aType, const char *anIOType) : SwapDir(aType), IO(NULL), map(file_map_create()), suggest(0), swaplog_fd (-1), currentIOOptions(new ConfigOptionVector()), ioType(xstrdup(anIOType)), rebuilding_(false)
+ {
+     /* modulename is only set to disk modules that are built, by configure,
+      * so the Find call should never return NULL here.
+@@ -622,6 +622,15 @@ UFSSwapDir::logFile(char const *ext) const
+ void
+ UFSSwapDir::openLog()
+ {
++    assert(NumberOfUFSDirs || !UFSDirToGlobalDirMapping);
++    ++NumberOfUFSDirs;
++    assert(NumberOfUFSDirs <= Config.cacheSwap.n_configured);
++
++    if (rebuilding_) { // we did not close the temporary log used for rebuilding
++        assert(swaplog_fd >= 0);
++        return;
++    }
++
+     char *logPath;
+     logPath = logFile();
+     swaplog_fd = file_open(logPath, O_WRONLY | O_CREAT | O_BINARY);
+@@ -632,13 +641,6 @@ UFSSwapDir::openLog()
+     }
+ 
+     debugs(50, 3, "Cache Dir #" << index << " log opened on FD " << swaplog_fd);
+-
+-    if (0 == NumberOfUFSDirs)
+-        assert(NULL == UFSDirToGlobalDirMapping);
+-
+-    ++NumberOfUFSDirs;
+-
+-    assert(NumberOfUFSDirs <= Config.cacheSwap.n_configured);
+ }
+ 
+ void
+@@ -647,18 +649,20 @@ UFSSwapDir::closeLog()
+     if (swaplog_fd < 0)	/* not open */
+         return;
+ 
+-    file_close(swaplog_fd);
++    --NumberOfUFSDirs;
++    assert(NumberOfUFSDirs >= 0);
+ 
+-    debugs(47, 3, "Cache Dir #" << index << " log closed on FD " << swaplog_fd);
++    if (!NumberOfUFSDirs)
++        safe_free(UFSDirToGlobalDirMapping);
+ 
+-    swaplog_fd = -1;
++    if (rebuilding_) // we cannot close the temporary log used for rebuilding
++        return;
+ 
+-    --NumberOfUFSDirs;
++    file_close(swaplog_fd);
+ 
+-    assert(NumberOfUFSDirs >= 0);
++    debugs(47, 3, "Cache Dir #" << index << " log closed on FD " << swaplog_fd);
+ 
+-    if (0 == NumberOfUFSDirs)
+-        safe_free(UFSDirToGlobalDirMapping);
++    swaplog_fd = -1;
+ }
+ 
+ bool
+@@ -727,6 +731,9 @@ UFSSwapDir::rebuild()
+ void
+ UFSSwapDir::closeTmpSwapLog()
+ {
++    assert(rebuilding_);
++    rebuilding_ = false;
++
+     char *swaplog_path = xstrdup(logFile(NULL));
+     char *new_path = xstrdup(logFile(".new"));
+     int fd;
+@@ -753,6 +760,8 @@ UFSSwapDir::closeTmpSwapLog()
+ FILE *
+ UFSSwapDir::openTmpSwapLog(int *clean_flag, int *zero_flag)
+ {
++    assert(!rebuilding_);
++
+     char *swaplog_path = xstrdup(logFile(NULL));
+     char *clean_path = xstrdup(logFile(".last-clean"));
+     char *new_path = xstrdup(logFile(".new"));
+@@ -786,7 +795,7 @@ UFSSwapDir::openTmpSwapLog(int *clean_flag, int *zero_flag)
+     }
+ 
+     swaplog_fd = fd;
+-
++    rebuilding_ = true;
+     {
+         const StoreSwapLogHeader header;
+         MemBuf buf;
+@@ -1031,6 +1040,11 @@ FreeObject(void *address)
+ void
+ UFSSwapDir::logEntry(const StoreEntry & e, int op) const
+ {
++    if (swaplog_fd < 0) {
++        debugs(36, 5, "cannot log " << e << " in the middle of reconfiguration");
++        return;
++    }
++
+     StoreSwapLogData *s = new StoreSwapLogData;
+     s->op = (char) op;
+     s->swap_filen = e.swap_filen;
+@@ -1144,18 +1158,17 @@ UFSSwapDir::DirClean(int swap_index)
+     return k;
+ }
+ 
+-void
+-UFSSwapDir::CleanEvent(void *unused)
++/// safely cleans a few unused files if possible
++int
++UFSSwapDir::HandleCleanEvent()
+ {
+     static int swap_index = 0;
+     int i;
+     int j = 0;
+     int n = 0;
+-    /*
+-     * Assert that there are UFS cache_dirs configured, otherwise
+-     * we should never be called.
+-     */
+-    assert(NumberOfUFSDirs);
++
++    if (!NumberOfUFSDirs)
++        return 0; // probably in the middle of reconfiguration
+ 
+     if (NULL == UFSDirToGlobalDirMapping) {
+         SwapDir *sd;
+@@ -1195,11 +1208,19 @@ UFSSwapDir::CleanEvent(void *unused)
+         n = DirClean(swap_index);
+         swap_index++;
+     }
++    return n;
++}
+ 
++void
++UFSSwapDir::CleanEvent(void *)
++{
++    const int n = HandleCleanEvent();
+     eventAdd("storeDirClean", CleanEvent, NULL,
+              15.0 * exp(-0.25 * n), 1);
+ }
+ 
++
++
+ int
+ UFSSwapDir::IsUFSDir(SwapDir * sd)
+ {
+diff --git a/src/fs/ufs/store_io_ufs.cc b/src/fs/ufs/store_io_ufs.cc
+index 5b84d74..c8ab3cd 100644
+--- a/src/fs/ufs/store_io_ufs.cc
++++ b/src/fs/ufs/store_io_ufs.cc
+@@ -499,7 +499,7 @@ UFSStoreState::drainWriteQueue()
+     if (flags.write_draining)
+         return;
+ 
+-    if (!theFile->canWrite())
++    if (!theFile || !theFile->canWrite())
+         return;
+ 
+     flags.write_draining = true;
+diff --git a/src/fs/ufs/ufscommon.cc b/src/fs/ufs/ufscommon.cc
+index c016e9c..00a70db 100644
+--- a/src/fs/ufs/ufscommon.cc
++++ b/src/fs/ufs/ufscommon.cc
+@@ -340,9 +340,11 @@ void
+ RebuildState::RebuildStep(void *data)
+ {
+     RebuildState *rb = (RebuildState *)data;
+-    rb->rebuildStep();
++    if (!reconfiguring)
++        rb->rebuildStep();
+ 
+-    if (!rb->isDone())
++    // delay storeRebuildComplete() when reconfiguring to protect storeCleanup()
++    if (!rb->isDone() || reconfiguring)
+         eventAdd("storeRebuild", RebuildStep, rb, 0.0, 1);
+     else {
+         StoreController::store_dirs_rebuilding--;
+diff --git a/src/fs/ufs/ufscommon.h b/src/fs/ufs/ufscommon.h
+index cf70188..cfeb238 100644
+--- a/src/fs/ufs/ufscommon.h
++++ b/src/fs/ufs/ufscommon.h
+@@ -124,6 +124,7 @@ private:
+     bool pathIsDirectory(const char *path)const;
+     int swaplog_fd;
+     static EVH CleanEvent;
++    static int HandleCleanEvent();
+     bool verifyCacheDirs();
+     void rebuild();
+     int createDirectory(const char *path, int);
+@@ -135,7 +136,7 @@ private:
+     void optionIODump(StoreEntry * e) const;
+     mutable ConfigOptionVector *currentIOOptions;
+     char const *ioType;
+-
++    bool rebuilding_; ///< whether RebuildState is writing the new swap.state
+ };
+ 
+ #include "RefCount.h"
+diff --git a/src/Store.h b/src/Store.h
+index cd3d066..419b66c 100644
+--- a/src/Store.h
++++ b/src/Store.h
+@@ -208,6 +208,8 @@ private:
+     bool hasOneOfEtags(const String &reqETags, const bool allowWeakMatch) const;
+ };
+ 
++std::ostream &operator <<(std::ostream &os, const StoreEntry &e);
++
+ /// \ingroup StoreAPI
+ class NullStoreEntry:public StoreEntry
+ {
+diff --git a/src/store.cc b/src/store.cc
+index c3eafb8..783fd73 100644
+--- a/src/store.cc
++++ b/src/store.cc
+@@ -1980,6 +1980,45 @@ StoreEntry::isAccepting() const
+     return true;
+ }
+ 
++std::ostream &operator <<(std::ostream &os, const StoreEntry &e)
++{
++    os << "e:";
++
++    if (e.swap_filen > -1 || e.swap_dirn > -1)
++        os << 'd' << e.swap_filen << '@' << e.swap_dirn;
++
++    os << '=';
++
++    // print only non-default status values, using unique letters
++    if (e.mem_status != NOT_IN_MEMORY ||
++            e.store_status != STORE_PENDING ||
++            e.swap_status != SWAPOUT_NONE ||
++            e.ping_status != PING_NONE) {
++        if (e.mem_status != NOT_IN_MEMORY) os << 'm';
++        if (e.store_status != STORE_PENDING) os << 's';
++        if (e.swap_status != SWAPOUT_NONE) os << 'w' << e.swap_status;
++        if (e.ping_status != PING_NONE) os << 'p' << e.ping_status;
++    }
++
++    // print only set flags, using unique letters
++    if (e.flags) {
++        if (EBIT_TEST(e.flags, ENTRY_SPECIAL)) os << 'S';
++        if (EBIT_TEST(e.flags, ENTRY_REVALIDATE)) os << 'R';
++        if (EBIT_TEST(e.flags, DELAY_SENDING)) os << 'P';
++        if (EBIT_TEST(e.flags, RELEASE_REQUEST)) os << 'X';
++        if (EBIT_TEST(e.flags, REFRESH_REQUEST)) os << 'F';
++        if (EBIT_TEST(e.flags, ENTRY_DISPATCHED)) os << 'D';
++        if (EBIT_TEST(e.flags, KEY_PRIVATE)) os << 'I';
++        if (EBIT_TEST(e.flags, ENTRY_FWD_HDR_WAIT)) os << 'W';
++        if (EBIT_TEST(e.flags, ENTRY_NEGCACHED)) os << 'N';
++        if (EBIT_TEST(e.flags, ENTRY_VALIDATED)) os << 'V';
++        if (EBIT_TEST(e.flags, ENTRY_BAD_LENGTH)) os << 'L';
++        if (EBIT_TEST(e.flags, ENTRY_ABORTED)) os << 'A';
++    }
++
++    return os << '/' << &e << '*';
++}
++
+ /* NullStoreEntry */
+ 
+ NullStoreEntry NullStoreEntry::_instance;
