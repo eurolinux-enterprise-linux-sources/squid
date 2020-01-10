@@ -1,0 +1,56 @@
+------------------------------------------------------------
+revno: 10488
+revision-id: squid3@treenet.co.nz-20140827144059-65pfjh7kcemvmi51
+parent: squid3@treenet.co.nz-20130710124748-2n6111r04xsi71vx
+committer: Amos Jeffries <squid3@treenet.co.nz>
+branch nick: SQUID_3_1
+timestamp: Wed 2014-08-27 08:40:59 -0600
+message:
+  Ignore Range headers with unidentifiable byte-range values
+  
+  If squid is unable to determine the byte value for ranges, treat the
+  header as invalid.
+------------------------------------------------------------
+# Bazaar merge directive format 2 (Bazaar 0.90)
+# revision_id: squid3@treenet.co.nz-20140827144059-65pfjh7kcemvmi51
+# target_branch: http://bzr.squid-cache.org/bzr/squid3/branches\
+#   /SQUID_3_1
+# testament_sha1: f718561e7bf1fccf0e18ebd164f076c78b09f995
+# timestamp: 2014-08-27 14:43:38 +0000
+# source_branch: http://bzr.squid-cache.org/bzr/squid3/branches\
+#   /SQUID_3_1
+# base_revision_id: squid3@treenet.co.nz-20130710124748-\
+#   2n6111r04xsi71vx
+# 
+# Begin patch
+=== modified file 'src/HttpHdrRange.cc'
+--- src/HttpHdrRange.cc 2012-09-23 06:30:14 +0000
++++ src/HttpHdrRange.cc 2014-08-27 14:40:59 +0000
+@@ -93,7 +93,7 @@
+ 
+     /* is it a suffix-byte-range-spec ? */
+     if (*field == '-') {
+-        if (!httpHeaderParseOffset(field + 1, &length))
++        if (!httpHeaderParseOffset(field + 1, &length) || !known_spec(length))
+             return false;
+     } else
+         /* must have a '-' somewhere in _this_ field */
+@@ -101,7 +101,7 @@
+             debugs(64, 2, "invalid (missing '-') range-spec near: '" << field << "'");
+             return false;
+         } else {
+-            if (!httpHeaderParseOffset(field, &offset))
++            if (!httpHeaderParseOffset(field, &offset) || !known_spec(offset))
+                 return false;
+ 
+             p++;
+@@ -110,7 +110,7 @@
+             if (p - field < flen) {
+                 int64_t last_pos;
+ 
+-                if (!httpHeaderParseOffset(p, &last_pos))
++                if (!httpHeaderParseOffset(p, &last_pos) || !known_spec(last_pos))
+                     return false;
+ 
+                 // RFC 2616 s14.35.1 MUST: last-byte-pos >= first-byte-pos
+

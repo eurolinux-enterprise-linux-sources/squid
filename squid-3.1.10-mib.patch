@@ -1,0 +1,41 @@
+--- squid-3.1.23.orig/src/mib.txt	2013-01-09 03:15:21.000000000 +0100
++++ squid-3.1.23/src/mib.txt	2015-05-25 17:27:29.870140970 +0200
+@@ -17,7 +17,7 @@ IMPORTS
+         	FROM INET-ADDRESS-MIB;
+ 
+ squid MODULE-IDENTITY
+-    LAST-UPDATED "200812240200Z"
++    LAST-UPDATED "201505250000Z"
+     ORGANIZATION "National Laboratory for Applied Network Research"
+     CONTACT-INFO
+             "        Squid Developers
+@@ -27,6 +27,11 @@ squid MODULE-IDENTITY
+ 		"Squid MIB defined for the management of the Squid
+ 		proxy server. See http://www.squid-cache.org/."
+ 
++    REVISION      "201505250000Z"
++    DESCRIPTION
++		"Fixed syntax error in MIB: CachePeerIndex and
++		CachePeerEntry were not declared"
++
+     REVISION      "200812240200Z"
+     DESCRIPTION
+ 		"Corrected MIB strictness requirements. Mapped
+@@ -715,7 +720,7 @@ squid MODULE-IDENTITY
+ --
+ 
+ 	cachePeerTable OBJECT-TYPE
+-		SYNTAX SEQUENCE OF CachePeerEntry
++		SYNTAX SEQUENCE OF CachePeerTableEntry
+ 		MAX-ACCESS not-accessible
+ 		STATUS current
+ 		DESCRIPTION
+@@ -774,7 +779,7 @@ squid MODULE-IDENTITY
+ 
+ 
+ 	cachePeerIndex OBJECT-TYPE
+-		SYNTAX CachePeerIndex
++		SYNTAX CachePeerTableIndex
+ 		MAX-ACCESS read-only
+ 		STATUS current
+ 		DESCRIPTION

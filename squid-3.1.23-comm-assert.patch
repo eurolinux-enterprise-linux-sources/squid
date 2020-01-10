@@ -1,0 +1,19 @@
+diff --git a/src/comm.cc b/src/comm.cc
+index fdfa752..8698c0b 100644
+--- a/src/comm.cc
++++ b/src/comm.cc
+@@ -2461,7 +2461,13 @@ AcceptLimiter::kick()
+      */
+     Acceptor temp = deferred.pop_back();
+ 
+-    comm_accept (temp.acceptFD, temp.theFunction, temp.theData);
++    /* comm_accept asserts that temp.acceptFD is open
++     * No point in continuing if FD has been closed.
++     */
++    if (isOpen(temp.acceptFD))
++    {
++        comm_accept (temp.acceptFD, temp.theFunction, temp.theData);
++    }
+ }
+ 
+ /// Start waiting for a possibly half-closed connection to close

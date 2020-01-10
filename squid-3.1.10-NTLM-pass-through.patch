@@ -1,0 +1,58 @@
+diff -up squid-3.1.10/src/cf.data.pre.http10 squid-3.1.10/src/cf.data.pre
+--- squid-3.1.10/src/cf.data.pre.http10	2012-07-31 13:13:19.680240027 +0200
++++ squid-3.1.10/src/cf.data.pre	2012-07-31 13:13:19.724240103 +0200
+@@ -6723,4 +6723,13 @@ DOC_START
+ 	not all comm loops supports large values.
+ DOC_END
+ 
++NAME: http10
++TYPE: onoff
++LOC: Config.onoff.http10
++DEFAULT: off
++DOC_START
++	Enable this option and Squid will revert using http header
++	'Proxy-Connection' to indicate persistent connection.
++DOC_END
++
+ EOF
+diff -up squid-3.1.10/src/client_side_reply.cc.http10 squid-3.1.10/src/client_side_reply.cc
+--- squid-3.1.10/src/client_side_reply.cc.http10	2010-12-22 06:46:56.000000000 +0100
++++ squid-3.1.10/src/client_side_reply.cc	2012-07-31 13:13:19.725240166 +0200
+@@ -1448,7 +1448,8 @@ clientReplyContext::buildReplyHeader()
+         hdr->putStr(HDR_VIA, strVia.termedBuf());
+     }
+     /* Signal keep-alive or close explicitly */
+-    hdr->putStr(HDR_CONNECTION, request->flags.proxy_keepalive ? "keep-alive" : "close");
++    hdr->putStr(Config.onoff.http10 ? HDR_PROXY_CONNECTION : HDR_CONNECTION,
++                request->flags.proxy_keepalive ? "keep-alive" : "close");
+ 
+ #if ADD_X_REQUEST_URI
+     /*
+diff -up squid-3.1.10/src/http.cc.http10 squid-3.1.10/src/http.cc
+--- squid-3.1.10/src/http.cc.http10	2010-12-22 06:46:56.000000000 +0100
++++ squid-3.1.10/src/http.cc	2012-07-31 13:13:19.727250091 +0200
+@@ -1729,7 +1729,11 @@ HttpStateData::httpBuildRequestHeader(Ht
+ 
+     /* maybe append Connection: keep-alive */
+     if (flags.keepalive) {
+-        hdr_out->putStr(HDR_CONNECTION, "keep-alive");
++      if (flags.proxying && Config.onoff.http10) {
++        hdr_out->putStr(HDR_PROXY_CONNECTION, "keep-alive");
++      } else {
++        hdr_out->putStr(HDR_CONNECTION, "keep-alive");
++      }
+     }
+ 
+     /* append Front-End-Https */
+diff -up squid-3.1.10/src/structs.h.http10 squid-3.1.10/src/structs.h
+--- squid-3.1.10/src/structs.h.http10	2012-07-31 14:00:51.319240418 +0200
++++ squid-3.1.10/src/structs.h	2012-07-31 14:01:00.281240381 +0200
+@@ -448,6 +448,7 @@ struct SquidConfig {
+ #endif /* FOLLOW_X_FORWARDED_FOR */
+ 
+         int WIN32_IpAddrChangeMonitor;
++	int http10;
+     } onoff;
+ 
+     int forward_max_tries;
+ 

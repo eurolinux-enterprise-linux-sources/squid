@@ -1,0 +1,15 @@
+--- squid-3.1.10/src/comm.cc.old	2013-08-18 00:13:01.555210473 +0530
++++ squid-3.1.10/src/comm.cc	2013-08-18 00:11:07.946310873 +0530
+@@ -2060,8 +2060,10 @@ comm_write(int fd, const char *buf, int 
+     debugs(5, 5, "comm_write: FD " << fd << ": sz " << size << ": asynCall " << callback);
+ 
+     /* Make sure we are open, not closing, and not writing */
+-    assert(isOpen(fd));
+-    assert(!fd_table[fd].closing());
++    if(!isOpen(fd) || fd_table[fd].closing()) {
++        return;
++    }
++
+     comm_io_callback_t *ccb = COMMIO_FD_WRITECB(fd);
+     assert(!ccb->active());
+ 

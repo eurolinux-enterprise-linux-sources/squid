@@ -1,0 +1,13 @@
+--- squid-3.1.10/src/dns_internal.cc.orig	2014-01-06 15:44:01.401001363 +0530
++++ squid-3.1.10/src/dns_internal.cc	2014-01-06 15:44:45.058000480 +0530
+@@ -1322,6 +1322,10 @@ idnsReadVCHeader(int fd, char *buf, size
+     vc->read_msglen = 0;
+ 
+     vc->msglen = ntohs(vc->msglen);
++    if(!vc->msglen) {
++        comm_close(fd);
++        return;
++    }
+ 
+     vc->msg->init(vc->msglen, vc->msglen);
+     comm_read(fd, vc->msg->buf, vc->msglen, idnsReadVC, vc);

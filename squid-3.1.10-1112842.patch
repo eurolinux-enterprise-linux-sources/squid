@@ -1,0 +1,22 @@
+--- src/comm.cc.orig	2015-05-21 14:15:02.080426749 +0200
++++ src/comm.cc	2015-05-21 14:28:40.420443404 +0200
+@@ -2615,6 +2615,19 @@
+     assert (!deferredReads.empty());
+ 
+     DeferredRead &read = deferredReads.head->element;
++
++    // NOTE: at this point the connection has been paused/stalled for an unknown
++    //       amount of time. We must re-validate that it is active and usable.
++
++    // If the connection has been closed already. Cancel this read.
++    if (!fd_table || !isOpen(read.theRead.fd)) {
++        if (read.closer != NULL) {
++            read.closer->cancel("Connection closed before.");
++            read.closer = NULL;
++        }
++        read.markCancelled();
++    }
++
+     if (!read.cancelled) {
+         comm_remove_close_handler(read.theRead.fd, read.closer);
+         read.closer = NULL;

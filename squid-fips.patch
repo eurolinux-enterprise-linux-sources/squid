@@ -1,0 +1,243 @@
+diff -aur squid-3.1.10-orig/helpers/basic_auth/NCSA/crypt_md5.c squid-3.1.10/helpers/basic_auth/NCSA/crypt_md5.c
+--- squid-3.1.10-orig/helpers/basic_auth/NCSA/crypt_md5.c	2010-12-22 00:46:56.000000000 -0500
++++ squid-3.1.10/helpers/basic_auth/NCSA/crypt_md5.c	2012-06-18 16:31:58.325801893 -0400
+@@ -55,7 +55,7 @@
+     static const char *sp, *ep;
+     unsigned char final[16];
+     int sl, pl, i, j;
+-    SquidMD5_CTX ctx, ctx1;
++    MD5_CTX ctx, ctx1;
+     unsigned long l;
+ 
+     if (*salt == '$') {
+@@ -178,7 +178,7 @@
+ char *md5sum(const char *s)
+ {
+     static unsigned char digest[16];
+-    SquidMD5_CTX ctx;
++    MD5_CTX ctx;
+     int idx;
+     static char sum[33];
+ 
+diff -up squid-3.1.23/helpers/basic_auth/NCSA/ncsa_auth.c.uJYdQz squid-3.1.23/helpers/basic_auth/NCSA/ncsa_auth.c
+--- squid-3.1.23/helpers/basic_auth/NCSA/ncsa_auth.c.uJYdQz	2015-02-10 19:52:36.829729019 +0100
++++ squid-3.1.23/helpers/basic_auth/NCSA/ncsa_auth.c	2015-02-10 19:58:24.159723764 +0100
+@@ -144,23 +144,33 @@ main(int argc, char **argv)
+         u = (user_data *) hash_lookup(hash, user);
+         if (u == NULL) {
+             printf("ERR No such user\n");
++	}
+ #if HAVE_CRYPT
+-        } else if (strlen(passwd) <= 8 && strcmp(u->passwd, (char *) crypt(passwd, u->passwd)) == 0) {
+-            // Bug 3107: crypt() DES functionality silently truncates long passwords.
+-            printf("OK\n");
+-        } else if (strlen(passwd) > 8 && strcmp(u->passwd, (char *) crypt(passwd, u->passwd)) == 0) {
+-            // Bug 3107: crypt() DES functionality silently truncates long passwords.
+-            fprintf(stderr, "SECURITY ALERT: NCSA DES algorithm truncating user %s password to 8 bytes. Upgrade to MD5.", user);
+-            // Highly Unsafe: permit a transition period for admin to update passwords.
+-            printf("OK\n");
+-#endif
+-        } else if (strcmp(u->passwd, (char *) crypt_md5(passwd, u->passwd)) == 0) {
+-            printf("OK\n");
+-        } else if (strcmp(u->passwd, (char *) md5sum(passwd)) == 0) {
+-            printf("OK\n");
+-        } else {
++	else {
++		char *crypted = crypt(passwd, u->passwd);
++		if (strcmp(u->passwd, crypted) == 0) {
++            	  printf("OK\n");
++		} else {
++			char altpasswd[255]; /* more then enough for sha512 */
++			altpasswd[0]='\0';
++			strncat(altpasswd, "$1$", strlen("$1$"));
++			strncat(altpasswd, passwd, strlen(passwd));
++			crypted = crypt(altpasswd, u->passwd);
++			if ( (crypted != NULL) && (strcmp(u->passwd, crypted) == 0)) {
++				printf("OK\n");
++			} else {
++				 if (strcmp(u->passwd, (char *) md5sum(passwd)) == 0) {	/* md5 without salt and magic strings - Added by Ramon de Carvalho and Rodrigo Rubira Branco */
++            				printf("OK\n");
++        			} else {
++            				printf("ERR Wrong password\n");
++        			}
++			}
++		}
++	}
++#else
++	else
+             printf("ERR Wrong password\n");
+-        }
++#endif
+     }
+     if (hash != NULL) {
+         hashFreeItems(hash, my_free);
+diff -aur squid-3.1.10-orig/helpers/basic_auth/squid_radius_auth/squid_rad_auth.c squid-3.1.10/helpers/basic_auth/squid_radius_auth/squid_rad_auth.c
+--- squid-3.1.10-orig/helpers/basic_auth/squid_radius_auth/squid_rad_auth.c	2010-12-22 00:46:56.000000000 -0500
++++ squid-3.1.10/helpers/basic_auth/squid_radius_auth/squid_rad_auth.c	2012-06-18 16:31:58.325801893 -0400
+@@ -165,7 +165,7 @@
+ static void
+ md5_calc(uint8_t out[16], void *in, size_t len)
+ {
+-    SquidMD5_CTX ctx;
++    MD5_CTX ctx;
+     SquidMD5Init(&ctx);
+     SquidMD5Update(&ctx, in, len);
+     SquidMD5Final(out, &ctx);
+diff -aur squid-3.1.10-orig/include/md5.h squid-3.1.10/include/md5.h
+--- squid-3.1.10-orig/include/md5.h	2010-12-22 00:46:56.000000000 -0500
++++ squid-3.1.10/include/md5.h	2012-06-18 16:31:58.325801893 -0400
+@@ -36,16 +36,27 @@
+ 
+ #include "squid_types.h"
+ 
++#include <openssl/md5.h>
++
++#if 0
+ typedef struct SquidMD5Context {
+     uint32_t buf[4];
+     uint32_t bytes[2];
+     uint32_t in[16];
+ } SquidMD5_CTX;
++#endif
++
++#define SquidMD5Init(x) MD5_Init(x)
++#define SquidMD5Update(x,y,z) MD5_Update(x,y,z)
++#define SquidMD5Final(x,y) MD5_Final(x,y)
++#define SquidMD5Transform(x,y) MD5_Transform(x,y)
+ 
++#if 0
+ SQUIDCEXTERN void SquidMD5Init(struct SquidMD5Context *context);
+ SQUIDCEXTERN void SquidMD5Update(struct SquidMD5Context *context, const void *buf, unsigned len);
+ SQUIDCEXTERN void SquidMD5Final(uint8_t digest[16], struct SquidMD5Context *context);
+ SQUIDCEXTERN void SquidMD5Transform(uint32_t buf[4], uint32_t const in[16]);
++#endif
+ 
+ #define SQUID_MD5_DIGEST_LENGTH         16
+ 
+diff -aur squid-3.1.10-orig/lib/md5.c squid-3.1.10/lib/md5.c
+--- squid-3.1.10-orig/lib/md5.c	2010-12-22 00:46:56.000000000 -0500
++++ squid-3.1.10/lib/md5.c	2012-06-18 16:31:58.325801893 -0400
+@@ -56,6 +56,7 @@
+ #define byteSwap(buf,words)
+ #endif
+ 
++#if 0
+ /*
+  * Start MD5 accumulation.  Set bit count to 0 and buffer to mysterious
+  * initialization constants.
+@@ -148,6 +149,7 @@
+     memcpy(digest, ctx->buf, 16);
+     memset(ctx, 0, sizeof(*ctx));	/* In case it's sensitive */
+ }
++#endif
+ 
+ #ifndef ASM_MD5
+ 
+@@ -163,6 +165,7 @@
+ #define MD5STEP(f,w,x,y,z,in,s) \
+ 	 (w += f(x,y,z) + in, w = (w<<s | w>>(32-s)) + x)
+ 
++#if 0
+ /*
+  * The core of the MD5 algorithm, this alters an existing MD5 hash to
+  * reflect the addition of 16 longwords of new data.  SquidMD5Update blocks
+@@ -251,5 +254,5 @@
+     buf[2] += c;
+     buf[3] += d;
+ }
+-
++#endif
+ #endif /* !ASM_MD5 */
+diff -aur squid-3.1.10-orig/lib/rfc2617.c squid-3.1.10/lib/rfc2617.c
+--- squid-3.1.10-orig/lib/rfc2617.c	2010-12-22 00:46:56.000000000 -0500
++++ squid-3.1.10/lib/rfc2617.c	2012-06-18 16:31:58.325801893 -0400
+@@ -118,7 +118,7 @@
+     HASHHEX SessionKey
+ )
+ {
+-    SquidMD5_CTX Md5Ctx;
++    MD5_CTX Md5Ctx;
+ 
+     if (pszUserName) {
+         SquidMD5Init(&Md5Ctx);
+@@ -157,7 +157,7 @@
+     HASHHEX Response		/* request-digest or response-digest */
+ )
+ {
+-    SquidMD5_CTX Md5Ctx;
++    MD5_CTX Md5Ctx;
+     HASH HA2;
+     HASH RespHash;
+     HASHHEX HA2Hex;
+diff -aur squid-3.1.10-orig/src/MemObject.cc squid-3.1.10/src/MemObject.cc
+--- squid-3.1.10-orig/src/MemObject.cc	2010-12-22 00:46:56.000000000 -0500
++++ squid-3.1.10/src/MemObject.cc	2012-06-18 16:31:58.326801871 -0400
+@@ -54,7 +54,7 @@
+     unsigned int ck;
+     SquidMD5_CTX M;
+     static unsigned char digest[16];
+-    SquidMD5Init(&M);
++    private_MD5_Init(&M); /* allow even in fips mode */
+     SquidMD5Update(&M, (unsigned char *) url, strlen(url));
+     SquidMD5Final(digest, &M);
+     xmemcpy(&ck, digest, sizeof(ck));
+diff -aur squid-3.1.10-orig/src/store_key_md5.cc squid-3.1.10/src/store_key_md5.cc
+--- squid-3.1.10-orig/src/store_key_md5.cc	2010-12-22 00:46:56.000000000 -0500
++++ squid-3.1.10/src/store_key_md5.cc	2012-06-18 16:31:58.326801871 -0400
+@@ -102,10 +102,10 @@
+ storeKeyPrivate(const char *url, const HttpRequestMethod& method, int id)
+ {
+     static cache_key digest[SQUID_MD5_DIGEST_LENGTH];
+-    SquidMD5_CTX M;
++    MD5_CTX M;
+     assert(id > 0);
+     debugs(20, 3, "storeKeyPrivate: " << RequestMethodStr(method) << " " << url);
+-    SquidMD5Init(&M);
++    private_MD5_Init(&M); /* allow even in fips mode */
+     SquidMD5Update(&M, (unsigned char *) &id, sizeof(id));
+     SquidMD5Update(&M, (unsigned char *) &method, sizeof(method));
+     SquidMD5Update(&M, (unsigned char *) url, strlen(url));
+@@ -118,8 +118,8 @@
+ {
+     static cache_key digest[SQUID_MD5_DIGEST_LENGTH];
+     unsigned char m = (unsigned char) method.id();
+-    SquidMD5_CTX M;
+-    SquidMD5Init(&M);
++    MD5_CTX M;
++    private_MD5_Init(&M); /* allow even in fips mode */
+     SquidMD5Update(&M, &m, sizeof(m));
+     SquidMD5Update(&M, (unsigned char *) url, strlen(url));
+     SquidMD5Final(digest, &M);
+@@ -138,8 +138,8 @@
+     static cache_key digest[SQUID_MD5_DIGEST_LENGTH];
+     unsigned char m = (unsigned char) method.id();
+     const char *url = urlCanonical(request);
+-    SquidMD5_CTX M;
+-    SquidMD5Init(&M);
++    MD5_CTX M;
++    private_MD5_Init(&M); /* allow even in fips mode */
+     SquidMD5Update(&M, &m, sizeof(m));
+     SquidMD5Update(&M, (unsigned char *) url, strlen(url));
+ 
+diff -aur squid-3.1.10-orig/src/wccp2.cc squid-3.1.10/src/wccp2.cc
+--- squid-3.1.10-orig/src/wccp2.cc	2010-12-22 00:46:56.000000000 -0500
++++ squid-3.1.10/src/wccp2.cc	2012-06-18 16:32:41.066801305 -0400
+@@ -578,7 +578,7 @@
+ {
+     u_int8_t md5_digest[16];
+     char pwd[WCCP2_PASSWORD_LEN];
+-    SquidMD5_CTX M;
++    MD5_CTX M;
+ 
+     struct wccp2_security_md5_t *ws;
+ 
+@@ -632,7 +632,7 @@
+     struct wccp2_security_md5_t *ws = (struct wccp2_security_md5_t *) security;
+     u_int8_t md5_digest[16], md5_challenge[16];
+     char pwd[WCCP2_PASSWORD_LEN];
+-    SquidMD5_CTX M;
++    MD5_CTX M;
+ 
+     /* Make sure the security type matches what we expect */
+ 
+ 

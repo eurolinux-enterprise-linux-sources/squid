@@ -1,0 +1,17 @@
+Index: src/comm.cc
+===================================================================
+--- src/comm.cc.orig
++++ src/comm.cc
+@@ -2239,7 +2239,11 @@ void
+ comm_accept(int fd, IOACB *handler, void *handler_data)
+ {
+     debugs(5, 5, "comm_accept: FD " << fd << " handler: " << (void*)handler);
+-    assert(isOpen(fd));
++    if (!isOpen(fd)) {
++            debugs(50, DBG_IMPORTANT, HERE << "BUG 3556: FD " << fd << " is not an open socket.");
++            // XXX: do we need to run close(fd) or fd_close(fd) here?
++            return;
++    }
+ 
+     AsyncCall::Pointer call = commCbCall(5,5, "SomeCommAcceptHandler",
+                                          CommAcceptCbPtrFun(handler, handler_data));

@@ -1,0 +1,13 @@
+Index: squid-3.1.10/src/dns_internal.cc
+===================================================================
+--- squid-3.1.10.orig/src/dns_internal.cc
++++ squid-3.1.10/src/dns_internal.cc
+@@ -1265,7 +1265,7 @@ idnsCheckQueue(void *unused)
+                    std::setw(5)<< std::setprecision(2) << tvSubDsec(q->start_t, current_time) << " seconds");
+ 
+             if (q->rcode != 0)
+-                idnsCallback(q, NULL, -q->rcode, q->error);
++                idnsCallback(q, NULL, -q->rcode, q->error ? q->error : "Unknown error");
+             else
+                 idnsCallback(q, NULL, -16, "Timeout");
+ 
