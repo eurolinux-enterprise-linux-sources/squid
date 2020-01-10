@@ -2,7 +2,7 @@
 
 Name:     squid
 Version:  3.1.23
-Release:  16%{?dist}.5
+Release:  16%{?dist}.6
 Summary:  The Squid proxy caching server
 Epoch:    7
 License:  GPLv2 and (LGPLv2+ and Public Domain)
@@ -366,6 +366,10 @@ if [ "$1" -ge "1" ] ; then
 fi
 
 %changelog
+* Mon Jul 25 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.6
+- Resolves: #1359204 - CVE-2016-5408 squid: Buffer overflow vulnerability
+  in cachemgr.cgi tool
+
 * Wed Jun 29 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.1.23-16.5
 - Resolves: #1351313 - squid aborts with MemBuf.cc:280: "size < capacity" messages
 
