@@ -1,0 +1,379 @@
+diff --git a/compat/compat.h b/compat/compat.h
+index 00714ed..92f245a 100644
+--- a/compat/compat.h
++++ b/compat/compat.h
+@@ -11,7 +11,7 @@
+ 
+ /*
+  * From discussions it was chosen to push compat code as far down as possible.
+- * That means we can have a seperate compat for most
++ * That means we can have a separate compat for most
+  *  compatability and portability hacks and resolutions.
+  *
+  * This file is meant to collate all those hacks files together and
+diff --git a/helpers/basic_auth/DB/basic_db_auth.8 b/helpers/basic_auth/DB/basic_db_auth.8
+index 1aebcee..77e683c 100644
+--- a/helpers/basic_auth/DB/basic_db_auth.8
++++ b/helpers/basic_auth/DB/basic_db_auth.8
+@@ -147,8 +147,8 @@
+ .Vb 1
+ \& basic_db_auth [options]
+ .Ve
+-.SH "DESCRIPTOIN"
+-.IX Header "DESCRIPTOIN"
++.SH "DESCRIPTION"
++.IX Header "DESCRIPTION"
+ This program verifies username & password to a database
+ .SH "OPTIONS"
+ .IX Header "OPTIONS"
+@@ -213,7 +213,7 @@ This manual was written by \fIHenrik Nordstrom <henrik@henriknordstrom.net\fR>
+ Copyright (C) 2007 Henrik Nordstrom <henrik@henriknordstrom.net>
+ Copyright (C) 2010 Luis Daniel Lucio Quiroz <dlucio@okay.com.mx> (Joomla support)
+ This program is free software. You may redistribute copies of it under the
+-terms of the \s-1GNU\s0 General Public License version 2, or (at youropinion) any
++terms of the \s-1GNU\s0 General Public License version 2, or (at your opinion) any
+ later version.
+ .SH "QUESTIONS"
+ .IX Header "QUESTIONS"
+diff --git a/helpers/basic_auth/DB/basic_db_auth.pl.in b/helpers/basic_auth/DB/basic_db_auth.pl.in
+index 8dc7f00..3672488 100644
+--- a/helpers/basic_auth/DB/basic_db_auth.pl.in
++++ b/helpers/basic_auth/DB/basic_db_auth.pl.in
+@@ -14,7 +14,7 @@ use Getopt::Long;
+ 
+  basic_db_auth [options]
+ 
+-=head1 DESCRIPTOIN
++=head1 DESCRIPTION
+ 
+ This program verifies username & password to a database
+ 
+@@ -97,7 +97,7 @@ This manual was written by I<Henrik Nordstrom <henrik@henriknordstrom.net>>
+ Copyright (C) 2007 Henrik Nordstrom <henrik@henriknordstrom.net>
+ Copyright (C) 2010 Luis Daniel Lucio Quiroz <dlucio@okay.com.mx> (Joomla support)
+ This program is free software. You may redistribute copies of it under the
+-terms of the GNU General Public License version 2, or (at youropinion) any
++terms of the GNU General Public License version 2, or (at your opinion) any
+ later version.
+ 
+ =head1 QUESTIONS
+diff --git a/helpers/basic_auth/LDAP/basic_ldap_auth.8 b/helpers/basic_auth/LDAP/basic_ldap_auth.8
+index 3893514..cb972cd 100644
+--- a/helpers/basic_auth/LDAP/basic_ldap_auth.8
++++ b/helpers/basic_auth/LDAP/basic_ldap_auth.8
+@@ -98,7 +98,7 @@ option). Defaults to
+ .B Note:
+ This can only be done if all your users are located directly under
+ the same position in the LDAP tree and the login name is used for naming
+-each user object. If your LDAP tree does not match these criterias or if
++each user object. If your LDAP tree does not match these criteria or if
+ you want to filter who are valid users then you need to use a search filter
+ to search for your users DN (
+ .B \-f
+@@ -187,14 +187,14 @@ when to dereference aliases. Defaults to
+ dereference aliases (default),
+ .B always
+ dereference aliases, only while
+-.B search ing
++.B searching
+ or only to
+ .B find
+ the base object.
+ .
+ .if !'po4a'hide' .TP
+ .if !'po4a'hide' .B "\-H ldap_uri
+-Specity the LDAP server to connect to by LDAP URI (requires OpenLDAP libraries).
++Specify the LDAP server to connect to by LDAP URI (requires OpenLDAP libraries).
+ Servers can also be specified last on the command line.
+ .
+ .if !'po4a'hide' .TP
+diff --git a/helpers/digest_auth/LDAP/digest_pw_auth.cc b/helpers/digest_auth/LDAP/digest_pw_auth.cc
+index 50ce8fb..866cf9c 100644
+--- a/helpers/digest_auth/LDAP/digest_pw_auth.cc
++++ b/helpers/digest_auth/LDAP/digest_pw_auth.cc
+@@ -30,7 +30,7 @@
+  * the file format.  However storing such a triple does little to
+  * improve security: If compromised the username:realm:HA1 combination
+  * is "plaintext equivalent" - for the purposes of digest authentication
+- * they allow the user access. Password syncronisation is not tackled
++ * they allow the user access. Password synchronization is not tackled
+  * by digest - just preventing on the wire compromise.
+  *
+  * Copyright (c) 2003  Robert Collins  <robertc@squid-cache.org>
+diff --git a/helpers/digest_auth/eDirectory/digest_pw_auth.cc b/helpers/digest_auth/eDirectory/digest_pw_auth.cc
+index 5db1ce4..aaeb86d 100644
+--- a/helpers/digest_auth/eDirectory/digest_pw_auth.cc
++++ b/helpers/digest_auth/eDirectory/digest_pw_auth.cc
+@@ -30,7 +30,7 @@
+  * the file format.  However storing such a triple does little to
+  * improve security: If compromised the username:realm:HA1 combination
+  * is "plaintext equivalent" - for the purposes of digest authentication
+- * they allow the user access. Password syncronisation is not tackled
++ * they allow the user access. Password synchronization is not tackled
+  * by digest - just preventing on the wire compromise.
+  *
+  * Copyright (c) 2003  Robert Collins  <robertc@squid-cache.org>
+diff --git a/helpers/digest_auth/file/digest_file_auth.8 b/helpers/digest_auth/file/digest_file_auth.8
+index 008d53c..66254d9 100644
+--- a/helpers/digest_auth/file/digest_file_auth.8
++++ b/helpers/digest_auth/file/digest_file_auth.8
+@@ -15,7 +15,7 @@ file
+ is an installed binary authentication program for Squid. It handles digest 
+ authentication protocol and authenticates against a text file backend.
+ .
+-This program will automatically detect the existence of a concurrecy channel-ID and adjust appropriately.
++This program will automatically detect the existence of a concurrency channel-ID and adjust appropriately.
+ It may be used with any value 0 or above for the auth_param children concurrency= parameter.
+ .
+ .SH OPTIONS
+@@ -54,7 +54,7 @@ the file format.  However storing such a triple does little to
+ improve security: If compromised the
+ .B username:realm:HA1 
+ combination is "plaintext equivalent" - for the purposes of digest authentication
+-they allow the user access. Password syncronisation is not tackled
++they allow the user access. Password synchronization is not tackled
+ by digest - just preventing on the wire compromise.
+ .
+ .SH AUTHOR
+diff --git a/helpers/digest_auth/file/digest_file_auth.cc b/helpers/digest_auth/file/digest_file_auth.cc
+index cd17a54..5d36563 100644
+--- a/helpers/digest_auth/file/digest_file_auth.cc
++++ b/helpers/digest_auth/file/digest_file_auth.cc
+@@ -33,7 +33,7 @@
+  * the file format.  However storing such a triple does little to
+  * improve security: If compromised the username:realm:HA1 combination
+  * is "plaintext equivalent" - for the purposes of digest authentication
+- * they allow the user access. Password syncronisation is not tackled
++ * they allow the user access. Password synchronization is not tackled
+  * by digest - just preventing on the wire compromise.
+  *
+  * Copyright (c) 2003  Robert Collins  <robertc@squid-cache.org>
+diff --git a/helpers/digest_auth/file/text_backend.cc b/helpers/digest_auth/file/text_backend.cc
+index 0b58670..5f4e882 100644
+--- a/helpers/digest_auth/file/text_backend.cc
++++ b/helpers/digest_auth/file/text_backend.cc
+@@ -29,7 +29,7 @@
+  * the file format.  However storing such a triple does little to
+  * improve security: If compromised the username:realm:HA1 combination
+  * is "plaintext equivalent" - for the purposes of digest authentication
+- * they allow the user access. Password syncronisation is not tackled
++ * they allow the user access. Password synchronization is not tackled
+  * by digest - just preventing on the wire compromise.
+  *
+  * Copyright (c) 2003  Robert Collins  <robertc@squid-cache.org>
+diff --git a/helpers/external_acl/LDAP_group/ext_ldap_group_acl.8 b/helpers/external_acl/LDAP_group/ext_ldap_group_acl.8
+index 1345f6a..d165f57 100644
+--- a/helpers/external_acl/LDAP_group/ext_ldap_group_acl.8
++++ b/helpers/external_acl/LDAP_group/ext_ldap_group_acl.8
+@@ -53,7 +53,7 @@ When to dereference aliases. Defaults to 'never'
+ dereference aliases (default),
+ .BI always
+ dereference aliases, only while
+-.BR search ing
++.BR searching
+ or only to
+ .B find
+ the base object
+@@ -143,7 +143,7 @@ Specify the LDAP server to connect to
+ .
+ .if !'po4a'hide' .TP
+ .if !'po4a'hide' .BI \-H " ldapuri"
+-Specity the LDAP server to connect to by a LDAP URI (requires OpenLDAP libraries)
++Specify the LDAP server to connect to by a LDAP URI (requires OpenLDAP libraries)
+ .
+ .if !'po4a'hide' .TP
+ .if !'po4a'hide' .BI \-K
+diff --git a/helpers/external_acl/kerberos_ldap_group/README b/helpers/external_acl/kerberos_ldap_group/README
+index 4d80409..78e8a67 100644
+--- a/helpers/external_acl/kerberos_ldap_group/README
++++ b/helpers/external_acl/kerberos_ldap_group/README
+@@ -65,7 +65,7 @@ KRB5_KTNAME=/etc/squid/HTTP.keytab
+ export KRB5_KTNAME
+ 
+ If you use a different Kerberos domain than the machine itself is in you can point squid to 
+-the seperate Kerberos config file by setting the following environmnet variable in the startup 
++the separate Kerberos config file by setting the following environment variable in the startup 
+ script.
+ 
+ KRB5_CONFIG=/etc/krb5-squid.conf
+diff --git a/helpers/external_acl/kerberos_ldap_group/ext_kerberos_ldap_group_acl.8 b/helpers/external_acl/kerberos_ldap_group/ext_kerberos_ldap_group_acl.8
+index 6972104..90b2cdd 100644
+--- a/helpers/external_acl/kerberos_ldap_group/ext_kerberos_ldap_group_acl.8
++++ b/helpers/external_acl/kerberos_ldap_group/ext_kerberos_ldap_group_acl.8
+@@ -163,7 +163,7 @@ the proxy name set in IE or firefox. You can not use an IP address.
+ .if !'po4a'hide' .ft
+ .
+ If you use a different Kerberos domain than the machine itself is in you can point squid to
+-the seperate Kerberos config file by setting the following environmnet variable in the startup
++the separate Kerberos config file by setting the following environment variable in the startup
+ script.
+ .if !'po4a'hide' .P
+ .if !'po4a'hide' .ft CR
+diff --git a/helpers/external_acl/session/ext_session_acl.8 b/helpers/external_acl/session/ext_session_acl.8
+index 6a2ec7b..a631fb2 100644
+--- a/helpers/external_acl/session/ext_session_acl.8
++++ b/helpers/external_acl/session/ext_session_acl.8
+@@ -21,7 +21,7 @@ and timing out sessions. The timeout is based either on idle use (
+ ) or a fixed period of time (
+ .B \-T
+ ). The former is suitable for displaying terms and conditions to a user; the
+-latter is suitable for the display of advertisments or other notices (both as a
++latter is suitable for the display of advertisements or other notices (both as a
+ splash page \- see config examples in the wiki online). The session helper can also be used
+ to force users to re\-authenticate if the 
+ .B %LOGIN 
+@@ -55,7 +55,7 @@ used as the database. If a path is specified, a Berkeley DB database
+ environment is created within the directory. The advantage of the latter
+ is better database support between multiple instances of the session
+ helper. Using multiple instances of the session helper with a single
+-database file will cause synchronisation problems between processes.
++database file will cause synchronization problems between processes.
+ If this option is not specified the session details will be kept in
+ memory only and all sessions will reset each time Squid restarts its
+ helpers (Squid restart or rotation of logs).
+diff --git a/helpers/log_daemon/DB/log_db_daemon.8 b/helpers/log_daemon/DB/log_db_daemon.8
+index abb4407..d260feb 100644
+--- a/helpers/log_daemon/DB/log_db_daemon.8
++++ b/helpers/log_daemon/DB/log_db_daemon.8
+@@ -143,8 +143,8 @@ log_db_daemon \- Database logging daemon for Squid
+ .SH "SYNOPSIS"
+ .IX Header "SYNOPSIS"
+ log_db_daemon \s-1DSN\s0 [options]
+-.SH "DESCRIPTOIN"
+-.IX Header "DESCRIPTOIN"
++.SH "DESCRIPTION"
++.IX Header "DESCRIPTION"
+ This program writes Squid access.log entries to a database.
+ Presently only accepts the \fBsquid\fR native format
+ .IP "\fB\s-1DSN\s0\fR" 8
+diff --git a/helpers/log_daemon/DB/log_db_daemon.pl.in b/helpers/log_daemon/DB/log_db_daemon.pl.in
+index 66b863f..24e0256 100755
+--- a/helpers/log_daemon/DB/log_db_daemon.pl.in
++++ b/helpers/log_daemon/DB/log_db_daemon.pl.in
+@@ -18,7 +18,7 @@ log_db_daemon - Database logging daemon for Squid
+ 
+ log_db_daemon DSN [options]
+ 
+-=head1 DESCRIPTOIN
++=head1 DESCRIPTION
+ 
+ This program writes Squid access.log entries to a database.
+ Presently only accepts the B<squid> native format
+@@ -373,7 +373,7 @@ To distinguish only between HITs and MISSes:
+     WHERE squid_request_status LIKE '%MISS%')
+     /
+     (SELECT COUNT(*) FROM access_log)*100
+-    AS pecentage;
++    AS percentage;
+ 
+ =item Response time ranges
+ 
+@@ -433,7 +433,7 @@ Indexes should be created according to the queries that are more frequently run.
+ 
+ This script currently implements only the C<L> (i.e. "append a line to the log") command, therefore the log lines are never purged from the table. This approach has an obvious scalability problem.
+ 
+-One solution would be to implement e.g. the "rotate log" command in a way that would calculate some summary values, put them in a "summary table" and then delete the lines used to caluclate those values.
++One solution would be to implement e.g. the "rotate log" command in a way that would calculate some summary values, put them in a "summary table" and then delete the lines used to calculate those values.
+ 
+ Similar cleanup code could be implemented in an external script and run periodically independently from squid log commands.
+ 
+diff --git a/helpers/negotiate_auth/kerberos/README b/helpers/negotiate_auth/kerberos/README
+index 69c2a6c..d49af11 100644
+--- a/helpers/negotiate_auth/kerberos/README
++++ b/helpers/negotiate_auth/kerberos/README
+@@ -53,7 +53,7 @@ KRB5_KTNAME=/etc/squid/HTTP.keytab
+ export KRB5_KTNAME
+ 
+ If you use a different Kerberos domain than the machine itself is in you can point squid to 
+-the seperate Kerberos config file by setting the following environmnet variable in the startup 
++the separate Kerberos config file by setting the following environment variable in the startup 
+ script.
+ 
+ KRB5_CONFIG=/etc/krb-squid5.conf
+diff --git a/helpers/negotiate_auth/kerberos/negotiate_kerberos_auth.8 b/helpers/negotiate_auth/kerberos/negotiate_kerberos_auth.8
+index b31b046..52a86a2 100644
+--- a/helpers/negotiate_auth/kerberos/negotiate_kerberos_auth.8
++++ b/helpers/negotiate_auth/kerberos/negotiate_kerberos_auth.8
+@@ -69,7 +69,7 @@ KRB5_KTNAME=/etc/squid/HTTP.keytab
+ export KRB5_KTNAME
+ 
+ If you use a different Kerberos domain than the machine itself is in you can point squid to
+-the seperate Kerberos config file by setting the following environmnet variable in the startup
++the separate Kerberos config file by setting the following environment variable in the startup
+ script.
+ 
+ KRB5_CONFIG=/etc/krb5\-squid.conf
+diff --git a/helpers/storeid_rewrite/file/storeid_file_rewrite.8 b/helpers/storeid_rewrite/file/storeid_file_rewrite.8
+index c314387..aafe7d5 100644
+--- a/helpers/storeid_rewrite/file/storeid_file_rewrite.8
++++ b/helpers/storeid_rewrite/file/storeid_file_rewrite.8
+@@ -162,7 +162,7 @@ Eg:
+ Rewrite rules are matched in the same order as they appear in the rules file.
+ So for best performance, sort it in order of frequency of occurrence.
+ .PP
+-This program will automatically detect the existence of a concurrecy channel-ID and adjust appropriately.
++This program will automatically detect the existence of a concurrency channel-ID and adjust appropriately.
+ It may be used with any value 0 or above for the store_id_children concurrency= parameter.
+ .SH "OPTIONS"
+ .IX Header "OPTIONS"
+diff --git a/helpers/storeid_rewrite/file/storeid_file_rewrite.pl.in b/helpers/storeid_rewrite/file/storeid_file_rewrite.pl.in
+index dccd164..12e0d95 100644
+--- a/helpers/storeid_rewrite/file/storeid_file_rewrite.pl.in
++++ b/helpers/storeid_rewrite/file/storeid_file_rewrite.pl.in
+@@ -29,7 +29,7 @@ Eg:
+ Rewrite rules are matched in the same order as they appear in the rules file.
+ So for best performance, sort it in order of frequency of occurrence.
+ 
+-This program will automatically detect the existence of a concurrecy channel-ID and adjust appropriately.
++This program will automatically detect the existence of a concurrency channel-ID and adjust appropriately.
+ It may be used with any value 0 or above for the store_id_children concurrency= parameter.
+ 
+ =head1 OPTIONS
+diff --git a/src/StoreFileSystem.h b/src/StoreFileSystem.h
+index d9a33c5..53ae98f 100644
+--- a/src/StoreFileSystem.h
++++ b/src/StoreFileSystem.h
+@@ -47,7 +47,7 @@
+  \par
+  * configure will take a list of storage types through the
+  * --enable-store-io parameter. This parameter takes a list of
+- * space seperated storage types. For example,
++ * space separated storage types. For example,
+  * --enable-store-io="ufs aufs" .
+  *
+  \par
+diff --git a/src/ipcache.cc b/src/ipcache.cc
+index 0eaab11..f350ccd 100644
+--- a/src/ipcache.cc
++++ b/src/ipcache.cc
+@@ -50,7 +50,7 @@
+  \defgroup IPCacheInternal IP Cache Internals
+  \ingroup IPCacheAPI
+  \todo  when IP cache is provided as a class. These sub-groups will be obsolete
+- *  for now they are used to seperate the public and private functions.
++ *  for now they are used to separate the public and private functions.
+  *  with the private ones all being in IPCachInternal and public in IPCacheAPI
+  *
+  \section InternalOperation Internal Operation
+diff --git a/src/ssl/ssl_crtd.8 b/src/ssl/ssl_crtd.8
+index 9931e7e..ef39ebe 100644
+--- a/src/ssl/ssl_crtd.8
++++ b/src/ssl/ssl_crtd.8
+@@ -33,7 +33,7 @@ is an installed binary.
+ Because the generation and signing of SSL certificates takes time
+ Squid must use external process to handle the work.
+ .
+-This process generates new SSL certificates and uses a disk cache of certificatess
++This process generates new SSL certificates and uses a disk cache of certificates
+ to improve response times on repeated requests.
+ Communication occurs via TCP sockets bound to the loopback interface.
+ .
+@@ -122,7 +122,7 @@ After any change to the signing CA in squid.conf be sure to erase and re-initial
+ .
+ .PP
+ For simple configuration the helper defaults can be used.
+-Only HTTP listening port options are required to enable generation and set the signign CA certificate.
++Only HTTP listening port options are required to enable generation and set the signing CA certificate.
+ For Example:
+ .if !'po4a'hide' .RS
+ .if !'po4a'hide' .B http_port 3128 ssl-bump generate-host-certificates=on dynamic_cert_mem_cache_size=4MB cert=/usr/local/squid/ssl_cert/www.sample.com.pem

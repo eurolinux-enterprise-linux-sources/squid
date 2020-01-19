@@ -1,0 +1,88 @@
+diff --git a/src/clients/FtpGateway.cc b/src/clients/FtpGateway.cc
+index 2f09b12..7e13a29 100644
+--- a/src/clients/FtpGateway.cc
++++ b/src/clients/FtpGateway.cc
+@@ -136,7 +136,10 @@ public:
+ 
+     /// create a data channel acceptor and start listening.
+     void listenForDataChannel(const Comm::ConnectionPointer &conn);
+-
++    virtual bool openListenSocket() {
++        ftpOpenListenSocket(this, 0);
++        return Comm::IsConnOpen(data.conn);
++		}
+     int checkAuth(const HttpHeader * req_hdr);
+     void checkUrlpath();
+     void buildTitleUrl();
+diff --git a/src/clients/FtpGateway.cc b/src/clients/FtpGateway.cc
+index 1a7b092..025df84 100644
+--- a/src/clients/FtpGateway.cc
++++ b/src/clients/FtpGateway.cc
+@@ -87,6 +87,13 @@ struct GatewayFlags {
+ class Gateway;
+ typedef void (StateMethod)(Ftp::Gateway *);
+ 
++} // namespace FTP
++
++static void ftpOpenListenSocket(Ftp::Gateway * ftpState, int fallback);
++
++namespace Ftp
++{
++
+ /// FTP Gateway: An FTP client that takes an HTTP request with an ftp:// URI,
+ /// converts it into one or more FTP commands, and then
+ /// converts one or more FTP responses into the final HTTP response.
+diff --git a/src/clients/FtpClient.cc b/src/clients/FtpClient.cc
+index a262eea..0978831 100644
+--- a/src/clients/FtpClient.cc
++++ b/src/clients/FtpClient.cc
+@@ -743,7 +743,8 @@ Ftp::Client::connectDataChannel()
+ bool
+ Ftp::Client::openListenSocket()
+ {
+-    return false;
++    debugs(9, 3, HERE);
++	  return false;
+ }
+ 
+ /// creates a data channel Comm close callback
+diff --git a/src/clients/FtpGateway.cc b/src/clients/FtpGateway.cc
+index 025df84..dbc4809 100644
+--- a/src/clients/FtpGateway.cc
++++ b/src/clients/FtpGateway.cc
+@@ -144,7 +144,8 @@ public:
+     /// create a data channel acceptor and start listening.
+     void listenForDataChannel(const Comm::ConnectionPointer &conn);
+     virtual bool openListenSocket() {
+-        ftpOpenListenSocket(this, 0);
++    		debugs(9, 3, HERE);
++				ftpOpenListenSocket(this, 0);
+         return Comm::IsConnOpen(data.conn);
+ 		}
+     int checkAuth(const HttpHeader * req_hdr);
+diff --git a/src/clients/FtpClient.h b/src/clients/FtpClient.h
+index ef2aa98..10a511e 100644
+--- a/src/clients/FtpClient.h
++++ b/src/clients/FtpClient.h
+@@ -115,7 +115,7 @@ public:
+     bool sendPort();
+     bool sendPassive();
+     void connectDataChannel();
+-    bool openListenSocket();
++    virtual bool openListenSocket();
+     void switchTimeoutToDataChannel();
+ 
+     CtrlChannel ctrl; ///< FTP control channel state
+diff --git a/src/clients/FtpGateway.cc b/src/clients/FtpGateway.cc
+index 8754e62..0ef1171 100644
+--- a/src/clients/FtpGateway.cc
++++ b/src/clients/FtpGateway.cc
+@@ -1979,7 +1979,7 @@ ftpReadEPRT(Ftp::Gateway * ftpState)
+         ftpSendPORT(ftpState);
+         return;
+     }
+-
++    ftpState->ctrl.message = NULL;
+     ftpRestOrList(ftpState);
+ }
+ 

@@ -1,0 +1,65 @@
+diff --git a/Makefile.am b/Makefile.am
+index c582a62..18ee5bb 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -6,11 +6,8 @@
+ ##
+ 
+ AUTOMAKE_OPTIONS = dist-bzip2 1.5 foreign
+-DIST_SUBDIRS	= compat lib libltdl scripts icons errors contrib doc helpers src test-suite tools
++DIST_SUBDIRS	= compat lib scripts icons errors contrib doc helpers src test-suite tools
+ SUBDIRS		= compat lib
+-if ENABLE_LOADABLE_MODULES
+-SUBDIRS += libltdl
+-endif
+ SUBDIRS += scripts icons errors doc helpers src tools test-suite
+ 
+ DISTCLEANFILES = include/stamp-h include/stamp-h[0-9]*
+diff --git a/Makefile.in b/Makefile.in
+index 09c9304..dad017b 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -87,7 +87,7 @@ PRE_UNINSTALL = :
+ POST_UNINSTALL = :
+ build_triplet = @build@
+ host_triplet = @host@
+-@ENABLE_LOADABLE_MODULES_TRUE@am__append_1 = libltdl
++#@ENABLE_LOADABLE_MODULES_TRUE@am__append_1 = libltdl
+ subdir = .
+ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
+ am__aclocal_m4_deps = $(top_srcdir)/acinclude/ax_with_prog.m4 \
+@@ -493,7 +493,7 @@ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+ AUTOMAKE_OPTIONS = dist-bzip2 1.5 foreign
+-DIST_SUBDIRS = compat lib libltdl scripts icons errors contrib doc helpers src test-suite tools
++DIST_SUBDIRS = compat lib scripts icons errors contrib doc helpers src test-suite tools
+ SUBDIRS = compat lib $(am__append_1) scripts icons errors doc helpers \
+ 	src tools test-suite
+ DISTCLEANFILES = include/stamp-h include/stamp-h[0-9]*
+diff --git a/aclocal.m4 b/aclocal.m4
+index 4dd204a..b66d5aa 100644
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -108,7 +108,7 @@ _LT_SET_OPTIONS([$0], [$1])
+ LIBTOOL_DEPS=$ltmain
+ 
+ # Always use our own libtool.
+-LIBTOOL='$(SHELL) $(top_builddir)/libtool'
++LIBTOOL='$(SHELL) libtool'
+ AC_SUBST(LIBTOOL)dnl
+ 
+ _LT_SETUP
+diff --git a/configure b/configure
+index ba4a984..6926f03 100755
+--- a/configure
++++ b/configure
+@@ -11551,7 +11551,7 @@ esac
+ LIBTOOL_DEPS=$ltmain
+ 
+ # Always use our own libtool.
+-LIBTOOL='$(SHELL) $(top_builddir)/libtool'
++LIBTOOL='$(SHELL) libtool'
+ 
+ 
+ 

@@ -1,0 +1,45 @@
+diff --git a/compat/Makefile.in b/compat/Makefile.in
+index 55b7ba0..ec58c7d 100644
+--- a/compat/Makefile.in
++++ b/compat/Makefile.in
+@@ -698,8 +698,8 @@ target_alias = @target_alias@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-AM_CFLAGS = $(SQUID_CFLAGS)
+-AM_CXXFLAGS = $(SQUID_CXXFLAGS)
++AM_CFLAGS = $(SQUID_CFLAGS) -fPIC
++AM_CXXFLAGS = $(SQUID_CXXFLAGS) -fPIC
+ CLEANFILES = testHeaders
+ AM_CPPFLAGS = -I$(top_srcdir) -I$(top_srcdir)/include \
+ 	-I$(top_srcdir)/lib -I$(top_srcdir)/src \
+diff --git a/lib/snmplib/Makefile.am b/lib/snmplib/Makefile.am
+index 52921e8..ad780f6 100644
+--- a/lib/snmplib/Makefile.am
++++ b/lib/snmplib/Makefile.am
+@@ -9,8 +9,8 @@
+ ##
+ ## Makefile for libsnmp.
+ ## 
+-AM_CFLAGS = $(SQUID_CFLAGS)
+-AM_CXXFLAGS = $(SQUID_CXXFLAGS)
++AM_CFLAGS = $(SQUID_CFLAGS) -fPIC
++AM_CXXFLAGS = $(SQUID_CXXFLAGS) -fPIC
+ AM_CPPFLAGS = \
+ 	-I$(top_srcdir) \
+ 	-I$(top_builddir)/include \
+diff --git a/lib/snmplib/Makefile.in b/lib/snmplib/Makefile.in
+index af07cd7..f59f62e 100644
+--- a/lib/snmplib/Makefile.in
++++ b/lib/snmplib/Makefile.in
+@@ -454,8 +454,8 @@ target_alias = @target_alias@
+ top_build_prefix = @top_build_prefix@
+ top_builddir = @top_builddir@
+ top_srcdir = @top_srcdir@
+-AM_CFLAGS = $(SQUID_CFLAGS)
+-AM_CXXFLAGS = $(SQUID_CXXFLAGS)
++AM_CFLAGS = $(SQUID_CFLAGS) -fPIC
++AM_CXXFLAGS = $(SQUID_CXXFLAGS) -fPIC
+ AM_CPPFLAGS = \
+ 	-I$(top_srcdir) \
+ 	-I$(top_builddir)/include \
