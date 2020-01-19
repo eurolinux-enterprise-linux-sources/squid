@@ -4,7 +4,7 @@
 
 Name:     squid
 Version:  3.5.20
-Release:  12%{?dist}
+Release:  12%{?dist}.1
 Summary:  The Squid proxy caching server
 Epoch:    7
 # See CREDITS for breakdown of non GPLv2+ code
@@ -47,6 +47,9 @@ Patch211: squid-3.5.20-tunnel-sigsegv.patch
 Patch212: squid-3.5.20-man-typos.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=1290404
 Patch213: squid-3.5.20-man-see-also.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=1620546
+Patch214: squid-3.5.20-empty-cname.patch
+
 
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: bash >= 2.0
@@ -127,6 +130,7 @@ migration and script which prepares squid for downgrade operation.
 %patch211 -p1 -b .tunnel-sigsegv
 %patch212 -p1 -b .man-see-also
 %patch213 -p1 -b .man-typos
+%patch214 -p1 -b .empty-cname
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1471140
 # Patch in the vendor documentation and used different location for documentation
@@ -356,6 +360,9 @@ fi
     chgrp squid /var/cache/samba/winbindd_privileged >/dev/null 2>&1 || :
 
 %changelog
+* Mon Dec 10 2018 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-12.1
+- Resolves: #1657638 - migration of upstream squid bug 4007
+
 * Mon Oct 02 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-12
 - Resolves: #1471140 - Missing detailed configuration file
 
