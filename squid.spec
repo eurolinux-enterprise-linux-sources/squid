@@ -4,7 +4,7 @@
 
 Name:     squid
 Version:  3.5.20
-Release:  12%{?dist}
+Release:  2%{?dist}.2
 Summary:  The Squid proxy caching server
 Epoch:    7
 # See CREDITS for breakdown of non GPLv2+ code
@@ -41,12 +41,6 @@ Patch208: squid-3.5.10-ssl-helper.patch
 Patch209: squid-3.5.20-conf-casecmp.patch
 # http://www.squid-cache.org/Versions/v3/3.5/changesets/SQUID-2016_11.patch
 Patch210: squid-CVE-2016-10002.patch
-# https://bugzilla.redhat.com/show_bug.cgi?id=1404817
-Patch211: squid-3.5.20-tunnel-sigsegv.patch
-# https://bugzilla.redhat.com/show_bug.cgi?id=1414853
-Patch212: squid-3.5.20-man-typos.patch
-# https://bugzilla.redhat.com/show_bug.cgi?id=1290404
-Patch213: squid-3.5.20-man-see-also.patch
 
 Buildroot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 Requires: bash >= 2.0
@@ -124,13 +118,6 @@ migration and script which prepares squid for downgrade operation.
 %patch208 -p1 -b .ssl-helper
 %patch209 -p1 -b .conf-casecmp
 %patch210 -p0 -b .CVE-2016-10002
-%patch211 -p1 -b .tunnel-sigsegv
-%patch212 -p1 -b .man-see-also
-%patch213 -p1 -b .man-typos
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1471140
-# Patch in the vendor documentation and used different location for documentation
-sed -i 's|@SYSCONFDIR@/squid.conf.documented|%{_docdir}/squid-%{version}/squid.conf.documented|' src/squid.8.in
 
 %build
 %ifarch sparcv9 sparc64 s390 s390x
@@ -159,7 +146,7 @@ LDFLAGS="$RPM_LD_FLAGS -pie -Wl,-z,relro -Wl,-z,now"
    --enable-auth-ntlm="smb_lm,fake" \
    --enable-auth-digest="file,LDAP,eDirectory" \
    --enable-auth-negotiate="kerberos" \
-   --enable-external-acl-helpers="file_userip,LDAP_group,time_quota,session,unix_group,wbinfo_group,kerberos_ldap_group" \
+   --enable-external-acl-helpers="file_userip,LDAP_group,time_quota,session,unix_group,wbinfo_group" \
    --enable-cache-digests \
    --enable-cachemgr-hostname=localhost \
    --enable-delay-pools \
@@ -172,7 +159,7 @@ LDFLAGS="$RPM_LD_FLAGS -pie -Wl,-z,relro -Wl,-z,now"
    --enable-removal-policies="heap,lru" \
    --enable-snmp \
    --enable-ssl-crtd \
-   --enable-storeio="aufs,diskd,rock,ufs" \
+   --enable-storeio="aufs,diskd,ufs" \
    --enable-wccpv2 \
    --enable-esi \
    --enable-ecap \
@@ -356,37 +343,12 @@ fi
     chgrp squid /var/cache/samba/winbindd_privileged >/dev/null 2>&1 || :
 
 %changelog
-* Mon Oct 02 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-12
-- Resolves: #1471140 - Missing detailed configuration file
-
-* Mon Oct 02 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-11
-- Resolves: #1452200 - Include kerberos_ldap_group helper in squid
-
-* Tue Apr 25 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-10
-- Resolves: #1445219 - [RFE] Add rock cache directive to squid
-
-* Thu Mar 23 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-9
-- Resolves: #1290404 - wrong names of components in man page, section SEE ALSO
-
-* Thu Mar 23 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-8
-- Resolves: #1414853 - typo error(s) in man page(s)
-
-* Mon Mar 20 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-7
-- Related: #1347096 - squid: ERROR: No running copy
-
-* Mon Mar 20 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-6
-- Resolves: #1347096 - squid: ERROR: No running copy
-
-* Thu Mar 02 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-5
-- Resolves: #1404817 - SIGSEV in TunnelStateData::handleConnectResponse()
-  during squid reconfigure and restart
-
-* Fri Jan 13 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-4
-- Resolves: #1412736 - CVE-2016-10002 squid: Information disclosure in HTTP
+* Fri Jan 13 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-2.2
+- Resolves: #1412735 - CVE-2016-10002 squid: Information disclosure in HTTP
   request processing
 
-* Thu Dec 15 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-3
-- Resolves: #1404894 - icap support has been disabled on squid 3.5.20-2.el7
+* Tue Dec 20 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-2.1
+- Resolves: #1406288 - icap support has been disabled on squid 3.5.20-2.el7
 
 * Wed Sep 21 2016 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-2
 - Resolves: #1378025 - host_verify_strict only accepts lowercase arguments
