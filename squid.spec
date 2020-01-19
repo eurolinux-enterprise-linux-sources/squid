@@ -4,7 +4,7 @@
 
 Name:     squid
 Version:  3.5.20
-Release:  10%{?dist}
+Release:  12%{?dist}
 Summary:  The Squid proxy caching server
 Epoch:    7
 # See CREDITS for breakdown of non GPLv2+ code
@@ -128,6 +128,10 @@ migration and script which prepares squid for downgrade operation.
 %patch212 -p1 -b .man-see-also
 %patch213 -p1 -b .man-typos
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1471140
+# Patch in the vendor documentation and used different location for documentation
+sed -i 's|@SYSCONFDIR@/squid.conf.documented|%{_docdir}/squid-%{version}/squid.conf.documented|' src/squid.8.in
+
 %build
 %ifarch sparcv9 sparc64 s390 s390x
    CXXFLAGS="$RPM_OPT_FLAGS -fPIE" \
@@ -155,7 +159,7 @@ LDFLAGS="$RPM_LD_FLAGS -pie -Wl,-z,relro -Wl,-z,now"
    --enable-auth-ntlm="smb_lm,fake" \
    --enable-auth-digest="file,LDAP,eDirectory" \
    --enable-auth-negotiate="kerberos" \
-   --enable-external-acl-helpers="file_userip,LDAP_group,time_quota,session,unix_group,wbinfo_group" \
+   --enable-external-acl-helpers="file_userip,LDAP_group,time_quota,session,unix_group,wbinfo_group,kerberos_ldap_group" \
    --enable-cache-digests \
    --enable-cachemgr-hostname=localhost \
    --enable-delay-pools \
@@ -352,6 +356,12 @@ fi
     chgrp squid /var/cache/samba/winbindd_privileged >/dev/null 2>&1 || :
 
 %changelog
+* Mon Oct 02 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-12
+- Resolves: #1471140 - Missing detailed configuration file
+
+* Mon Oct 02 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-11
+- Resolves: #1452200 - Include kerberos_ldap_group helper in squid
+
 * Tue Apr 25 2017 Luboš Uhliarik <luhliari@redhat.com> - 7:3.5.20-10
 - Resolves: #1445219 - [RFE] Add rock cache directive to squid
 
